@@ -1,28 +1,35 @@
 import { Console } from '@woowacourse/mission-utils';
+
 function calculate(input) {
   if (!input) return 0;
 
-  let delimiter = /[,:]/;
+  let DELIMITER = /[,:]/;
   let numberString = input;
 
   if (input.startsWith('//')) {
     const newlineIndex = input.indexOf('\\n');
 
     if (newlineIndex === -1) {
-      throw new Error('[ERROR] 커스텀 구분자 형식이 올바르지 않습니다.\n');
+      throw new Error('[ERROR] 커스텀 구분자 형식이 올바르지 않습니다.');
     }
 
     const customDelimiter = input.substring(2, newlineIndex);
     numberString = input.substring(newlineIndex + 2);
-    delimiter = customDelimiter;
+    DELIMITER = customDelimiter;
   }
 
-  const splitInput = numberString.split(delimiter);
+  const stringNumbers = numberString.split(DELIMITER);
 
-  const sum = splitInput.reduce((currentSum, stringInput) => {
-    const num = Number(stringInput);
-    if (isNaN(num)) throw new Error('숫자를 입력해 주세요.\n');
-    if (num < 0) throw new Error('양수를 입력해 주세요.\n');
+  const sum = stringNumbers.reduce((currentSum, strNum) => {
+    const trimmedStr = strNum.trim();
+    if (trimmedStr === '') {
+      throw new Error('[ERROR] 숫자 사이에 구분자가 연속으로 올 수 없습니다.');
+    }
+
+    const num = Number(trimmedStr);
+
+    if (isNaN(num)) throw new Error('[ERROR] 유효하지 않은 숫자입니다.');
+    if (num < 0) throw new Error('[ERROR] 음수는 허용되지 않습니다.');
 
     return currentSum + num;
   }, 0);
@@ -32,13 +39,9 @@ function calculate(input) {
 
 class App {
   async run() {
-    try {
-      const input = await Console.readLineAsync('덧셈할 문자열을 입력해 주세요.\n');
-      const result = calculate(input);
-      Console.print(`결과: ${result}`);
-    } catch (error) {
-      Console.print(`[Error] ${error.message}`);
-    }
+    const input = await Console.readLineAsync('덧셈할 문자열을 입력해 주세요.\n');
+    const result = calculate(input);
+    Console.print(`결과 : ${result}`);
   }
 }
 
